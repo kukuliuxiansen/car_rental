@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<!--你接口的包名是com.abc.dao,接口名是NameMapper.java，那么你的mapper.xml的namespace应该是com.abc.dao.NameMapper-->
+<mapper namespace="com.wd.car_rental.dao.OrderMapper">
+
+    <!--resultMap对应的是表与实体类的映射  - type 数据库表对应的实体类，别名或完整类名都可以-->
+    <resultMap id="BaseResultMap" type="com.wd.car_rental.entry.Order">
+        <!-- 结果集的主键 -->
+        <id column="orderId" property="orderId" jdbcType="BIGINT"/>
+        <!-- 普通的列  -column 是数据库中字段， property是实体类中字段-->
+        <result column="userId" property="userId" jdbcType="BIGINT"/>
+        <result column="carId" property="carId" jdbcType="BIGINT"/>
+        <result column="rentalState" property="rentalState" jdbcType="INTEGER"/>
+        <result column="endTime" property="endTime" jdbcType="TIMESTAMP"/>
+        <result column="addTime" property="addTime" jdbcType="TIMESTAMP"/>
+        <!--  内部对象使用  association    -->
+        <association property="car" javaType="com.wd.car_rental.entry.Car">
+            <!-- 结果集的主键 -->
+            <id column="carId" property="carId" jdbcType="BIGINT"/>
+            <!-- 普通的列  -column 是数据库中字段， property是实体类中字段-->
+            <result column="carNum" property="carNum" jdbcType="VARCHAR"/>
+            <result column="rentalState" property="rentalState" jdbcType="INTEGER"/>
+            <result column="delState" property="delState" jdbcType="INTEGER"/>
+            <result column="addTime" property="addTime" jdbcType="TIMESTAMP"/>
+        </association>
+        <!--   内部集合使用 collection     -->
+        <!--        <collection property="cars" ofType="com.wd.car_rental.entry.Car">-->
+        <!--            &lt;!&ndash; 结果集的主键 &ndash;&gt;-->
+        <!--            <id column="carId" property="carId" jdbcType="BIGINTEGER" />-->
+        <!--            &lt;!&ndash; 普通的列  -column 是数据库中字段， property是实体类中字段&ndash;&gt;-->
+        <!--            <result column="carNum" property="carNum" jdbcType="VARCHAR" />-->
+        <!--            <result column="rentalState" property="rentalState" jdbcType="INTEGER" />-->
+        <!--            <result column="delState" property="delState" jdbcType="INTEGER" />-->
+        <!--            <result column="addTime" property="addTime" jdbcType="TIMESTAMP" />-->
+        <!--        </collection>-->
+    </resultMap>
+
+    <sql id="orderBaseColumn">
+        o.orderId, o.userId , o.carId , o.rentalState , o.addTime , o.endTime
+    </sql>
+    <sql id="carBaseColumn">
+        c.carId, c.carNum , c.rentalState , c.delState , c.addTime
+    </sql>
+
+
+    <!--parameterType(输入类型)、resultType(输出类型)-->
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap">
+        SELECT
+        <include refid="orderBaseColumn"></include>
+        ,
+        <include refid="carBaseColumn"></include>
+        FROM `order` o,`car` c
+        <where>
+            o.orderId = #{orderId}  AND c.carId = o.carId
+        </where>
+    </select>
+
+    <select id="selectByUserIdAndCarIdAndRentalStateEqualsOne" resultMap="BaseResultMap">
+        SELECT o.*, c.*
+        FROM `order` o,
+             `car` c
+        WHERE o.userId = #{userId}
+          AND o.carId = #{carId}
+          AND o.rentalState = #{rentalState}
+          AND c.carId = o.carId
+    </select>
+
+</mapper>
